@@ -5,39 +5,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>당신의 얼굴 국적은?</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div>
-      <h1>당신의 얼굴 국적 알아보기<h1>
-      <h3>얼굴로 보는 인공지능 한 중 일 얼굴상 테스트</h3>
+    <div class="header">
+        <h1>당신의 얼굴 국적 알아보기<h1>
+        <h3>얼굴로 보는 인공지능 한 중 일 얼굴상 테스트</h3>
     </div>
-    <div>
-        <div id="upload-area">
-            <span>📸</span>
+    <div class="container">
+        <div id="upload-area" class="area">
+            <span class="guide-image">📸</span>
             <br />
             <span>사진을 올려놓거나 눌러서 업로드 해주세요!</span>
             <input id="upload-input" style="display: none;" type="file" accept="image/*" onchange="readFile(this.files[0]);" />
         </div>
-        <div id="loading-area" style="display: none;">
-            <span>🏃〰️</span>
+        <div id="loading-area" class="area" style="display: none;">
+            <span class="guide-image">🏃〰️</span>
             <br />
             <span>인공지능 모델을 불러오는 중입니다...</span>
         </div>
-        <div id="result-area" style="display: none;">
+        <div id="result-area" class="area" style="display: none;">
             <img id="upload-image" src="#" alt="your image" />     
             <div id='label-container'></div>
         </div>
-        <div id="retry-area" style="display: none;"> 
-            <span>다른 사진으로 테스트하려면 눌러주세요!</span> 
-        </div> 
+        <div id="retry-area" class="area" style="display: none;">
+            <span>다른 사진으로 테스트하려면 눌러주세요!</span>
+        </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script type="text/javascript">
-    
-    const URL = "https://teachablemachine.withgoogle.com/models/9TRNFHLxv/";
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/9TRNFHLxv/";
 
         let model, labelContainer, maxPredictions;
         let isModelReady = false;
@@ -87,7 +88,6 @@
             input.value = "";
         }
 
-
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
@@ -101,23 +101,25 @@
             }
         }
 
-  
+        async function predict() {
+            const prediction = await model.predict(image);
 
-   
-    async function predict() {
-       
-        const prediction = await model.predict(image);
-        prediction.sort((x, y) => y.probability - x.probability);
+            prediction.sort((x, y) => y.probability - x.probability);
 
-if (prediction[0].className === "한국인") {
-   labelContainer.childNodes[0].innerHTML = "<h3>당신은 한국인!</h3>";
-} else if (prediction[0].className === "중국인") {
-   labelContainer.childNodes[0].innerHTML = "<h3>당신은 중국인!</h3>";
-} else if (prediction[0].className === "일본인") {
-   labelContainer.childNodes[0].innerHTML = "<h3>당신은 일본인!</h3>";
-} else {
-    labelContainer.childNodes[0].innerHTML = "<h3>오류 발생</h3>";
-}
+            switch (prediction[0].className) {
+                case "한국":
+                    labelContainer.childNodes[0].innerHTML = "<h3>당신은 한국인!</h3>";
+                    break;
+                case "중국":
+                    labelContainer.childNodes[0].innerHTML = "<h3>당신은 중국인!</h3>";
+                    break;
+                case "일본":
+                    labelContainer.childNodes[0].innerHTML = "<h3>당신은 일본인!</h3>";
+                    break;
+                default:
+                    labelContainer.childNodes[0].innerHTML = "<h3>오류 발생</h3>";
+                    break;
+            }
 
 for (let i = 0; i < maxPredictions; i++) { 
     const classPrediction = prediction[i].className + ": " + Math.round(prediction[i].probability * 100) + "%";
